@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  payment-service:
+    build: .
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+      - PORT=3003
+      - DATABASE_SERVICE_URL=http://database-service:3005
+      - JWT_SECRET=your_jwt_secret_for_dev
+      - STRIPE_SECRET_KEY=sk_test_your_stripe_key
+      - RESERVATION_SERVICE_URL=http://reservation-service:3001
+      - NOTIFICATION_SERVICE_URL=http://notification-service:3004
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped

@@ -1,0 +1,48 @@
+# Logs du microservice de paiements
+*.log
+logs/
+
+# Dépendances
+node_modules/
+
+# Variables d'environnement
+.env
+.env.local
+.env.production
+
+# Fichiers de cache
+.cache/
+.npm/
+
+# Répertoires de build
+dist/
+build/
+
+# Fichiers temporaires
+tmp/
+temp/
+
+# Fichiers OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Couverture de tests
+coverage/
+*.lcov
+
+# Fichiers de test
+*.test.js.snap
+
+# Stripe
+stripe-webhook-test/
+
+# Certificats
+*.pem
+*.key
+*.crt
