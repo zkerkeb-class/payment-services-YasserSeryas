@@ -1,0 +1,102 @@
+# Exemples de requêtes API pour le microservice de paiements
+
+# Variables
+@baseUrl = http://localhost:3003
+@authToken = Bearer your_jwt_token_here
+
+### 1. Vérifier la santé du service
+GET {{baseUrl}}/health
+
+### 2. Obtenir les informations du service
+GET {{baseUrl}}/
+
+### 3. Créer un nouveau paiement
+POST {{baseUrl}}/api/payments
+Authorization: {{authToken}}
+Content-Type: application/json
+
+{
+  "reservation": "60f7b3b3b3b3b3b3b3b3b3b3",
+  "amount": 150.00,
+  "currency": "EUR",
+  "paymentMethod": "carte_credit",
+  "billingAddress": {
+    "name": "Jean Dupont",
+    "street": "123 Rue de la Paix",
+    "city": "Paris",
+    "postalCode": "75001",
+    "country": "France"
+  },
+  "paymentDetails": {
+    "cardNumber": "4242424242424242",
+    "expiryDate": "12/25",
+    "cvv": "123"
+  }
+}
+
+### 4. Récupérer un paiement par ID
+GET {{baseUrl}}/api/payments/60f7b3b3b3b3b3b3b3b3b3b3
+Authorization: {{authToken}}
+
+### 5. Lister tous les paiements avec pagination
+GET {{baseUrl}}/api/payments?page=1&limit=10&status=complété
+Authorization: {{authToken}}
+
+### 6. Mettre à jour le statut d'un paiement
+PUT {{baseUrl}}/api/payments/60f7b3b3b3b3b3b3b3b3b3b3/status
+Authorization: {{authToken}}
+Content-Type: application/json
+
+{
+  "status": "complété",
+  "transactionId": "txn_123456789"
+}
+
+### 7. Traiter un remboursement
+POST {{baseUrl}}/api/payments/60f7b3b3b3b3b3b3b3b3b3b3/refund
+Authorization: {{authToken}}
+Content-Type: application/json
+
+{
+  "amount": 50.00,
+  "reason": "Remboursement partiel demandé par le client"
+}
+
+### 8. Récupérer les paiements d'une réservation
+GET {{baseUrl}}/api/payments/reservation/60f7b3b3b3b3b3b3b3b3b3b3
+Authorization: {{authToken}}
+
+### 9. Obtenir les statistiques des paiements
+GET {{baseUrl}}/api/payments/stats
+Authorization: {{authToken}}
+
+### 10. Annuler un paiement
+DELETE {{baseUrl}}/api/payments/60f7b3b3b3b3b3b3b3b3b3b3
+Authorization: {{authToken}}
+
+### 11. Webhook Stripe (exemple)
+POST {{baseUrl}}/api/webhooks/stripe
+Content-Type: application/json
+Stripe-Signature: t=1234567890,v1=signature
+
+{
+  "id": "evt_test_webhook",
+  "object": "event",
+  "type": "payment_intent.succeeded",
+  "data": {
+    "object": {
+      "id": "pi_test_123",
+      "amount": 15000,
+      "currency": "eur",
+      "status": "succeeded"
+    }
+  }
+}
+
+### 12. Filtrer les paiements par méthode de paiement
+GET {{baseUrl}}/api/payments?paymentMethod=carte_credit&dateFrom=2024-01-01&dateTo=2024-12-31
+Authorization: {{authToken}}
+
+### 13. Rechercher des paiements par montant
+GET {{baseUrl}}/api/payments?minAmount=100&maxAmount=500
+Authorization: {{authToken}}
