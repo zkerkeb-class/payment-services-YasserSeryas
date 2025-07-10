@@ -13,7 +13,7 @@ export const authMiddleware = (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
     
-    logger.info(`Utilisateur authentifié: ${decoded.userId}`);
+    logger.info(`Utilisateur authentifié: ${JSON.stringify(decoded)}`);
     next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {

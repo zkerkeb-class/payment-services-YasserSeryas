@@ -8,16 +8,20 @@ import {
   processRefund,
   getPaymentsByReservation,
   getPaymentStats,
-  cancelPayment
+  cancelPayment,
+  createStripePaymentLink,
+  handleStripeWebhook,
+  checkStripeSessionStatus
 } from '../controllers/paymentController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
+import { extractUserToken, requireUserToken } from '../middleware/tokenMiddleware.js';
 import { validateRequest } from '../middleware/validateRequest.js';
 
 const router = express.Router();
 
 // Validation pour la création de paiement
 const createPaymentValidation = [
-  body('reservation')
+  body('reservationId')
     .isMongoId()
     .withMessage('ID de réservation invalide'),
   body('amount')
@@ -42,6 +46,18 @@ const createPaymentValidation = [
     .withMessage('Adresse email invalide')
 ];
 
+// Validation pour la création de lien Stripe
+const createStripeLinkValidation = [
+  body('successUrl')
+    .optional()
+    .isURL()
+    .withMessage('URL de succès invalide'),
+  body('cancelUrl')
+    .optional()
+    .isURL()
+    .withMessage('URL d\'annulation invalide')
+];
+
 // Validation pour le remboursement
 const refundValidation = [
   body('amount')
@@ -59,19 +75,28 @@ router.get('/health', (req, res) => {
   res.json({ status: 'OK', service: 'Payment Routes' });
 });
 
+// Webhook Stripe (doit être avant les middlewares d'auth)
+router.post('/webhook/stripe', 
+  express.raw({ type: 'application/json' }), 
+  handleStripeWebhook
+);
+
 // Routes protégées par authentification
+router.use(extractUserToken); // Extraire le token pour toutes les routes
 router.use(authMiddleware);
 
 // CRUD des paiements
-router.post('/', createPaymentValidation, validateRequest, createPayment);
-router.get('/stats', getPaymentStats);
-router.get('/:id', getPayment);
-router.get('/', getAllPayments);
-router.put('/:id/status', updatePaymentStatus);
-router.delete('/:id', cancelPayment);
+router.post('/', createPaymentValidation, validateRequest, requireUserToken, createPayment);
+router.get('/stats', requireUserToken, getPaymentStats);
+router.get('/:id', requireUserToken, getPayment);
+router.get('/', requireUserToken, getAllPayments);
+router.put('/:id/status', requireUserToken, updatePaymentStatus);
+router.delete('/:id', requireUserToken, cancelPayment);
 
 // Opérations spécifiques
-router.post('/:id/refund', refundValidation, validateRequest, processRefund);
-router.get('/reservation/:reservationId', getPaymentsByReservation);
+router.post('/:id/create-stripe-link', createStripeLinkValidation, validateRequest, requireUserToken, createStripePaymentLink);
+router.post('/:id/refund', refundValidation, validateRequest, requireUserToken, processRefund);
+router.get('/reservation/:reservationId', requireUserToken, getPaymentsByReservation);
+router.get('/stripe/session/:sessionId/status', requireUserToken, checkStripeSessionStatus);
 
 export default router;

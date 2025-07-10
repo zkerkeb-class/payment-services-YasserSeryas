@@ -1,11 +1,28 @@
-FROM node:18-alpine
+# Multi-stage build pour supporter développement et production
+FROM node:18-alpine as base
 
 WORKDIR /app
 
 # Copier les fichiers package
 COPY package*.json ./
 
-# Installer les dépendances
+# Stage de développement
+FROM base as development
+ENV NODE_ENV=development
+
+# Installer toutes les dépendances (dev incluses)
+RUN npm install
+
+# Exposer le port
+EXPOSE 3003
+
+# Commande pour démarrer en mode développement avec hot reload
+CMD ["npm", "run", "dev"]
+
+# Stage de production
+FROM base as production
+
+# Installer les dépendances de production uniquement
 RUN npm ci --only=production
 
 # Copier le code source

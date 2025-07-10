@@ -5,7 +5,7 @@ import { AppError } from '../utils/AppError.js';
 
 class PaymentService {
   constructor() {
-    this.reservationServiceUrl = process.env.RESERVATION_SERVICE_URL || 'http://localhost:3001';
+    this.reservationServiceUrl = process.env.RESERVATION_SERVICE_URL || 'http://localhost:3000';
     this.notificationServiceUrl = process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:3004';
   }
   // Valider qu'une réservation existe et peut être payée
@@ -114,7 +114,7 @@ class PaymentService {
   validatePaymentData(paymentData) {
     const errors = [];
 
-    if (!paymentData.reservation) {
+    if (!paymentData.reservationId) {
       errors.push('ID de réservation requis');
     }
 
